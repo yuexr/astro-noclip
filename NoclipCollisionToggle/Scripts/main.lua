@@ -1,5 +1,5 @@
--- Noclip Collision Toggle 1.1.0
-local VERSION = '1.1.0'
+-- Noclip Collision Toggle 1.1.1
+local VERSION = '1.1.1'
 local changed
 local scripts = debug.getinfo(1, 'S').source:sub(2):match('^(.*)[/\\]main.lua$')
 local camera = dofile(scripts .. '/camera.lua')
@@ -74,7 +74,7 @@ local function disable()
     camera.disable(controller)
 end
 
-RegisterConsoleCommandHandler('noclip', function(_, parameters, output)
+local function command(_, parameters, output)
     local action = parameters[1] and parameters[1]:lower()
     if #parameters == 1 and action == 'status' then
         local _, result = pcall(function()
@@ -97,5 +97,18 @@ RegisterConsoleCommandHandler('noclip', function(_, parameters, output)
     output:Log(message .. '\n')
     print('[Noclip Collision Toggle ' .. VERSION .. '] ' .. message .. '\n')
     return true
-end)
+end
+
+-- make commands case insensitive
+local function registerCases(word, prefix, index)
+    if index > #word then
+        RegisterConsoleCommandHandler(prefix, command)
+        return
+    end
+    local letter = word:sub(index, index)
+    registerCases(word, prefix .. letter, index + 1)
+    registerCases(word, prefix .. letter:upper(), index + 1)
+end
+registerCases('noclip', '', 1)
+
 print('[Noclip Collision Toggle ' .. VERSION .. '] Ready. Noclip starts off.\n')
